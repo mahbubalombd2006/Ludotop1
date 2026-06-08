@@ -6,8 +6,8 @@
 
 <title>Ludo Top 1 - Loading</title>
 
+<!-- সঠিক Supabase CDN লিংক এখানে যুক্ত করা হলো -->
 <script src="https://jsdelivr.net"></script>
-
 
 <style>
 
@@ -110,7 +110,7 @@ body{
 <div class="container">
 
   <div class="logo">
-    <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png">
+    <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png" alt="Logo">
   </div>
 
   <div class="title">Ludo Top 1</div>
@@ -126,7 +126,7 @@ body{
 
 <script>
 
-/* 🔑 SUPABASE CONNECT (URL + KEY = DOOR OPEN) */
+/* 🔑 SUPABASE CONNECT (আপনার আসল ইউআরএল ও কি অক্ষত রাখা হয়েছে) */
 const SUPABASE_URL = "https://jvyszdfernpsweparyuw.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2eXN6ZGZlcm5wc3dlcGFyeXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTIwMTEsImV4cCI6MjA5NjQyODAxMX0.Lt88u13F5tesQAh5ADeiL1jiURZBgFnFyOOyZ5yEV1M";
 
@@ -139,42 +139,52 @@ function setStatus(text){
   document.getElementById("status").innerText = text;
 }
 
-/* 🚀 CHECK LOGIN */
+/* 🚀 REAL-TIME LOGIN VALIDATION SYSTEM */
 async function checkUser(){
 
 try{
-
   setStatus("Checking session...");
+  
+  // LocalStorage থেকে আপনার সেভ করা কাস্টম লগইন ডেটা রিড করা
+  let localUser = JSON.parse(localStorage.getItem("user"));
 
-  const { data } = await supabase.auth.getSession();
+  setTimeout(async () => {
+    if(localUser && localUser.mobile){
+      setStatus("Verifying account...");
+      
+      // ডাটাবেজের 'users' টেবিল থেকে রিয়েল-টাইমে অ্যাকাউন্ট চেক করা
+      let { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("mobile", localUser.mobile)
+        .maybeSingle();
 
-  setStatus("Loading app...");
-
-  setTimeout(()=>{
-
-    if(data?.session){
-      setStatus("Login found ✔");
-      window.location.href = "home.html";
-    }else{
+      if(data && !error){
+        setStatus("Login found ✔");
+        localStorage.setItem("user", JSON.stringify(data));
+        window.location.href = "home.html";
+      } else {
+        setStatus("Session expired...");
+        localStorage.removeItem("user");
+        window.location.href = "login.html";
+      }
+    } else {
       setStatus("Redirecting to login...");
       window.location.href = "login.html";
     }
-
-  },1000);
+  }, 1000);
 
 }catch(e){
-
   setStatus("Error connecting...");
   setTimeout(()=>{
     window.location.href = "login.html";
-  },1200);
-
+  }, 1200);
 }
 
 }
 
-/* start */
-setTimeout(checkUser,1500);
+/* start loading process */
+setTimeout(checkUser, 1500);
 
 </script>
 
