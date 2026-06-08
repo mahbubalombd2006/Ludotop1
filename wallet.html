@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ludo Top 1 - Wallet</title>
+
+<!-- সঠিক Supabase CDN লিংক -->
+<script src="https://jsdelivr.net"></script>
+
+
+<style>
+
+/* RESET */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f6f6f6;
+}
+
+/* TOP BAR */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:linear-gradient(135deg,#ff8c00,#ffb347);
+  color:white;
+}
+
+/* BRAND */
+.brand{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.brand img{
+  width:38px;
+  height:38px;
+  object-fit:contain;
+}
+
+.balance{
+  background:white;
+  color:#ff8c00;
+  padding:5px 10px;
+  border-radius:20px;
+  font-weight:bold;
+  font-size:13px;
+}
+
+/* CONTAINER */
+.container{
+  padding:10px;
+  padding-bottom:80px;
+  max-width:500px;
+  margin:auto;
+}
+
+/* CARD */
+.card{
+  background:white;
+  margin:10px 0;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.card h4{
+  margin-bottom:10px;
+  color:#333;
+}
+
+/* ADMIN NUMBER BOX */
+.admin-numbers{
+  background:#fff3e0;
+  border:1px dashed #ff8c00;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:12px;
+}
+
+.number-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  font-size:14px;
+  color:#333;
+}
+
+.number-row:last-child{
+  margin-bottom:0;
+}
+
+/* COPY BUTTON */
+.copy-btn{
+  background:#ff8c00;
+  color:white;
+  border:none;
+  padding:5px 10px;
+  border-radius:5px;
+  font-size:12px;
+  cursor:pointer;
+  width:auto;
+  margin-top:0;
+}
+
+/* INPUT */
+input{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  font-size:14px;
+}
+
+/* ERROR & SUCCESS MESSAGES */
+.msg-box{
+  font-size:13px;
+  font-weight:bold;
+  margin-top:10px;
+  text-align:center;
+  display:none; 
+  padding:8px;
+  border-radius:6px;
+}
+
+.error-msg {
+  color: #ff3333;
+  background: #ffe6e6;
+}
+
+.success-msg {
+  color: #2ecc71;
+  background: #e8f9ec;
+}
+
+/* BUTTON */
+button{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#ff8c00;
+  color:white;
+  margin-top:8px;
+  cursor:pointer;
+}
+
+/* NAV */
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  background:white;
+  padding:10px 0;
+  box-shadow:0 -5px 15px rgba(0,0,0,0.1);
+}
+
+.nav div{
+  cursor:pointer;
+  font-size:14px;
+}
+
+.nav .active{
+  color:#ff8c00;
+  font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+
+  <div class="brand">
+    <!-- আপনার দেওয়া রকেট লোগোটি এখানে ডাইরেক্ট ইমেজের মাধ্যমে যুক্ত করা হয়েছে -->
+    <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png" alt="Logo">
+    <b>Ludo Top 1</b>
+  </div>
+
+  <div class="balance" id="balanceBox">💰 0 TK</div>
+
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+  <!-- DEPOSIT FORM -->
+  <div class="card">
+    <h4>Add Deposit</h4>
+    
+    <!-- ADMIN NUMBERS WITH COPY BUTTON -->
+    <div class="admin-numbers">
+      <div class="number-row">
+        <span>📱 <b>bKash:</b> <span id="bkashNum">017XXXXXXXX</span></span>
+        <button class="copy-btn" onclick="copyNumber('bkashNum', this)">Copy</button>
+      </div>
+      <div class="number-row">
+        <span>📱 <b>Nagad:</b> <span id="nagadNum">019XXXXXXXX</span></span>
+        <button class="copy-btn" onclick="copyNumber('nagadNum', this)">Copy</button>
+      </div>
+    </div>
+
+    <input type="number" id="amount" placeholder="Enter Amount (Min: 10 TK)">
+    <input type="text" id="txn" placeholder="Transaction ID">
+
+    <!-- লাল বা সবুজ মেসেজ দেখানোর বক্স -->
+    <div id="msgDisplay" class="msg-box"></div>
+
+    <button onclick="deposit()">Submit Deposit</button>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="nav">
+  <div onclick="location.href='home.html'">🏠 Home</div>
+  <div class="active" onclick="location.href='wallet.html'">💰 Wallet</div>
+  <div onclick="location.href='profile.html'">👤 Profile</div>
+</div>
+
+<script>
+
+/* SUPABASE */
+const supabase = window.supabase.createClient(
+"https://jvyszdfernpsweparyuw.supabase.co", 
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2eXN6ZGZlcm5wc3dlcGFyeXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTIwMTEsImV4cCI6MjA5NjQyODAxMX0.Lt88u13F5tesQAh5ADeiL1jiURZBgFnFyOOyZ5yEV1M"
+);
+
+/* USER */
+let user = JSON.parse(localStorage.getItem("user"));
+
+if(!user){
+  location.href="login.html";
+}
+
+/* TOP BAR BALANCE ONLY */
+async function loadBalance(){
+let { data } = await supabase
+.from("users")
+.select("wallet_balance")
+.eq("mobile", user.mobile)
+.single();
+
+if(data){
+document.getElementById("balanceBox").innerText = "💰 " + data.wallet_balance + " TK";
+} else {
+document.getElementById("balanceBox").innerText = "💰 " + (user.wallet_balance || 0) + " TK";
+}
+}
+loadBalance();
+
+/* কপি ফাংশন */
+function copyNumber(elementId, btn) {
+  let numText = document.getElementById(elementId).innerText;
+  
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(numText).then(() => {
+      showCopySuccess(btn);
+    }).catch(() => {
+      fallbackCopy(numText, btn);
+    });
+  } else {
+    fallbackCopy(numText, btn);
+  }
+}
+
+function fallbackCopy(text, btn) {
+  let dummyInput = document.createElement("input");
+  document.body.appendChild(dummyInput);
+  dummyInput.value = text;
+  dummyInput.select();
+  dummyInput.setSelectionRange(0, 99999);
+  try {
+    document.execCommand("copy");
+    showCopySuccess(btn);
+  } catch (err) {
+    showMsg("Failed to copy number!", true);
+  }
+  document.body.removeChild(dummyInput);
+}
+
+function showCopySuccess(btn) {
+  let originalText = btn.innerText;
+  btn.innerText = "Copied!";
+  btn.style.background = "#4CAF50";
+  setTimeout(() => {
+    btn.innerText = originalText;
+    btn.style.background = "#ff8c00";
+  }, 1500);
+}
+
+/* মেসেজ দেখানোর ফাংশন (লাল বা সবুজ) */
+function showMsg(text, isError) {
+  let msgBox = document.getElementById("msgDisplay");
+  msgBox.innerText = text;
+  msgBox.style.display = "block";
+  
+  if(isError) {
+    msgBox.className = "msg-box error-msg";
+  } else {
+    msgBox.className = "msg-box success-msg";
+  }
+}
+
+/* DEPOSIT FUNCTION */
+async function deposit(){
+  let amountInput = document.getElementById("amount").value.trim();
+  let txn = document.getElementById("txn").value.trim();
+  let msgBox = document.getElementById("msgDisplay");
+
+  msgBox.style.display = "none";
+
+  if(!amountInput || !txn){
+    showMsg("Error: Please fill out all fields!", true);
+    return;
+  }
+
+  let amount = Number(amountInput);
+
+  if(isNaN(amount) || amount < 10) {
+    showMsg("Error: Enter a valid amount! (Min: 10 TK)", true);
+    return;
+  }
+
+  if(txn.length < 4) {
+    showMsg("Error: Invalid Transaction ID!", true);
+    return;
+  }
+
+  try {
+    let { error } = await supabase.from("transactions").insert([{
+      user_mobile: user.mobile,
+      amount: amount,
+      method: "manual",
+      txn_id: txn,
+      status: "pending"
+    }]);
+
+    if(error) {
+      if(error.code === "23505") { 
+        showMsg("Error: This Transaction ID is already used!", true);
+      } else {
+        showMsg("Error: Database issues, try again.", true);
+      }
+      return;
+    }
+
+    showMsg("Deposit request sent successfully!", false);
+
+    document.getElementById("amount").value = "";
+    document.getElementById("txn").value = "";
+
+  } catch (err) {
+    showMsg("Error: Connection lost! Check network.", true);
+  }
+}
+
+</script>
+
+</body>
+</html>

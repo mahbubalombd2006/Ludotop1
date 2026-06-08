@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ludo Top 1 - Home</title>
+
+<script src="https://jsdelivr.net"></script>
+
+
+<style>
+
+/* RESET */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f6f6f6;
+}
+
+/* TOP BAR */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:linear-gradient(135deg,#ff8c00,#ffb347);
+  color:white;
+}
+
+/* BRAND */
+.brand{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.brand img{
+  width:38px;
+}
+
+.balance{
+  background:white;
+  color:#ff8c00;
+  padding:5px 10px;
+  border-radius:20px;
+  font-weight:bold;
+  font-size:13px;
+}
+
+.icon{
+  font-size:20px;
+  cursor:pointer;
+}
+
+/* CONTAINER */
+.container{
+  padding:10px;
+  padding-bottom:80px;
+}
+
+/* CARD */
+.card{
+  background:white;
+  margin:10px 0;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+/* TEXT */
+.info{
+  font-size:13px;
+  margin:3px 0;
+  color:#333;
+}
+
+/* BUTTON */
+button{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#ff8c00;
+  color:white;
+  margin-top:8px;
+}
+
+button:disabled{
+  background:#ccc;
+}
+
+/* NAV */
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  background:white;
+  padding:10px 0;
+  box-shadow:0 -5px 15px rgba(0,0,0,0.1);
+}
+
+.nav div{
+  cursor:pointer;
+  font-size:14px;
+}
+
+.nav .active{
+  color:#ff8c00;
+  font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+
+  <div class="brand">
+    <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png">
+    <b>Ludo Top 1</b>
+  </div>
+
+  <div class="balance" id="balanceBox">💰 0 TK</div>
+
+  <!-- SCREENSHOT PAGE -->
+  <div class="icon" onclick="location.href='screenshot.html'">
+    📸
+  </div>
+
+</div>
+
+<!-- MATCH LIST -->
+<div class="container" id="matchList">
+Loading matches...
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="nav">
+  <div class="active" onclick="location.href='home.html'">🏠 Home</div>
+  <div onclick="location.href='wallet.html'">💰 Wallet</div>
+  <div onclick="location.href='profile.html'">👤 Profile</div>
+</div>
+
+<script>
+
+/* SUPABASE */
+const supabase = window.supabase.createClient(
+"https://jvyszdfernpsweparyuw.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2eXN6ZGZlcm5wc3dlcGFyeXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTIwMTEsImV4cCI6MjA5NjQyODAxMX0.Lt88u13F5tesQAh5ADeiL1jiURZBgFnFyOOyZ5yEV1M"
+);
+
+/* USER */
+let user = JSON.parse(localStorage.getItem("user"));
+
+if(!user){
+  location.href="login.html";
+}
+
+/* BALANCE */
+document.getElementById("balanceBox").innerText =
+"💰 " + (user.wallet_balance || 0) + " TK";
+
+/* LOAD MATCHES */
+async function loadMatches(){
+
+let { data } = await supabase
+.from("matches")
+.select("*")
+.order("id", { ascending:false });
+
+if(!data){
+  document.getElementById("matchList").innerHTML = "No matches found";
+  return;
+}
+
+let html = "";
+
+data.forEach(m=>{
+
+let full = m.player2 ? true : false;
+
+html += `
+<div class="card">
+
+  <div class="info">💰 Fee: ${m.entry_fee}</div>
+  <div class="info">🏆 Prize: ${m.prize}</div>
+  <div class="info">🎮 Room: ${m.room_code || "Pending"}</div>
+  <div class="info">🕒 Time: ${m.start_time || "-"}</div>
+
+  <div class="info">👤 Player 1: ${m.player1 || "-"}</div>
+  <div class="info">👤 Player 2: ${m.player2 || "-"}</div>
+
+  <button onclick="join('${m.id}')" ${full ? "disabled" : ""}>
+    ${full ? "MATCH FULL" : "JOIN MATCH"}
+  </button>
+
+</div>
+`;
+});
+
+document.getElementById("matchList").innerHTML = html;
+
+}
+
+loadMatches();
+
+/* JOIN MATCH */
+async function join(id){
+
+let { data } = await supabase
+.from("matches")
+.select("*")
+.eq("id",id)
+.single();
+
+if(data.player2){
+alert("Already full");
+return;
+}
+
+await supabase
+.from("matches")
+.update({ player2:user.mobile })
+.eq("id",id);
+
+loadMatches();
+
+}
+
+</script>
+
+</body>
+</html>

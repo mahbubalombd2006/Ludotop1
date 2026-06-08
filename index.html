@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Ludo Top 1 - Loading</title>
+
+<script src="https://jsdelivr.net"></script>
+
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  width:100%;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#f3f0e8,#fff7e6);
+  overflow:hidden;
+}
+
+/* BOX */
+.container{
+  text-align:center;
+  width:90%;
+  max-width:340px;
+  animation:fadeIn 0.8s ease-in;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:scale(0.95);}
+  to{opacity:1; transform:scale(1);}
+}
+
+/* LOGO */
+.logo{
+  width:90px;
+  height:90px;
+  margin:auto;
+  animation:float 2s infinite ease-in-out;
+}
+
+.logo img{
+  width:100%;
+}
+
+@keyframes float{
+  0%{transform:translateY(0);}
+  50%{transform:translateY(-10px);}
+  100%{transform:translateY(0);}
+}
+
+/* TITLE */
+.title{
+  font-size:22px;
+  font-weight:bold;
+  margin-top:10px;
+  color:#222;
+}
+
+.subtitle{
+  font-size:12px;
+  color:#777;
+  margin-top:5px;
+}
+
+/* LOADER */
+.loader{
+  width:100%;
+  max-width:220px;
+  height:7px;
+  background:#e6e6e6;
+  border-radius:50px;
+  margin:20px auto 0;
+  overflow:hidden;
+}
+
+.progress{
+  width:0%;
+  height:100%;
+  background:linear-gradient(90deg,#ff8c00,#ffb347);
+  animation:load 2s forwards;
+}
+
+@keyframes load{
+  100%{width:100%;}
+}
+
+/* STATUS */
+.status{
+  margin-top:10px;
+  font-size:12px;
+  color:#999;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="logo">
+    <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png">
+  </div>
+
+  <div class="title">Ludo Top 1</div>
+  <div class="subtitle">Tournament App Loading...</div>
+
+  <div class="status" id="status">Connecting server...</div>
+
+  <div class="loader">
+    <div class="progress"></div>
+  </div>
+
+</div>
+
+<script>
+
+/* 🔑 SUPABASE CONNECT (URL + KEY = DOOR OPEN) */
+const SUPABASE_URL = "https://jvyszdfernpsweparyuw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2eXN6ZGZlcm5wc3dlcGFyeXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTIwMTEsImV4cCI6MjA5NjQyODAxMX0.Lt88u13F5tesQAh5ADeiL1jiURZBgFnFyOOyZ5yEV1M";
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+function setStatus(text){
+  document.getElementById("status").innerText = text;
+}
+
+/* 🚀 CHECK LOGIN */
+async function checkUser(){
+
+try{
+
+  setStatus("Checking session...");
+
+  const { data } = await supabase.auth.getSession();
+
+  setStatus("Loading app...");
+
+  setTimeout(()=>{
+
+    if(data?.session){
+      setStatus("Login found ✔");
+      window.location.href = "home.html";
+    }else{
+      setStatus("Redirecting to login...");
+      window.location.href = "login.html";
+    }
+
+  },1000);
+
+}catch(e){
+
+  setStatus("Error connecting...");
+  setTimeout(()=>{
+    window.location.href = "login.html";
+  },1200);
+
+}
+
+}
+
+/* start */
+setTimeout(checkUser,1500);
+
+</script>
+
+</body>
+</html>

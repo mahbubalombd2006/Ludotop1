@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Ludo Top 1 - Login</title>
+<script src="https://jsdelivr.net"></script>
+
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  width:100%;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#f3f0e8,#fff7e6);
+}
+
+/* BOX */
+.box{
+  width:90%;
+  max-width:340px;
+  text-align:center;
+  background:#fff;
+  padding:25px 18px;
+  border-radius:18px;
+  box-shadow:0 15px 35px rgba(0,0,0,0.12);
+}
+
+/* LOGO */
+.logo{
+  width:85px;
+  height:85px;
+  margin:auto;
+  animation:float 2s infinite ease-in-out;
+}
+
+.logo img{
+  width:100%;
+}
+
+@keyframes float{
+  0%{transform:translateY(0);}
+  50%{transform:translateY(-10px);}
+  100%{transform:translateY(0);}
+}
+
+/* TITLE */
+.title{
+  font-size:22px;
+  font-weight:bold;
+  margin-top:8px;
+  color:#222;
+}
+
+.subtitle{
+  font-size:12px;
+  color:#777;
+  margin-bottom:12px;
+}
+
+/* INPUT */
+input{
+  width:100%;
+  padding:12px;
+  margin:7px 0;
+  border:1px solid #ddd;
+  border-radius:10px;
+}
+
+/* BUTTON */
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#ff8c00;
+  color:white;
+  font-size:16px;
+}
+
+button:disabled{
+  opacity:0.6;
+}
+
+/* ERROR */
+.error{
+  color:red;
+  font-size:13px;
+  margin-top:10px;
+  min-height:18px;
+}
+
+/* SIGNUP */
+.signup{
+  margin-top:12px;
+  font-size:13px;
+}
+
+.signup a{
+  color:#ff8c00;
+  font-weight:bold;
+  text-decoration:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <!-- LOGO -->
+  <div class="logo">
+    <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png">
+  </div>
+
+  <!-- APP NAME -->
+  <div class="title">Ludo Top 1</div>
+  <div class="subtitle">Login to continue</div>
+
+  <!-- INPUT -->
+  <input id="mobile" placeholder="Mobile Number">
+  <input id="password" type="password" placeholder="Password">
+
+  <button id="btn" onclick="loginUser()">Login</button>
+
+  <div class="error" id="error"></div>
+
+  <!-- SIGNUP -->
+  <div class="signup">
+    নতুন ইউজার? <a href="signup.html">Create Account</a>
+  </div>
+
+</div>
+
+<script>
+
+/* 🔑 SUPABASE */
+const SUPABASE_URL = "https://jvyszdfernpsweparyuw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2eXN6ZGZlcm5wc3dlcGFyeXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTIwMTEsImV4cCI6MjA5NjQyODAxMX0.Lt88u13F5tesQAh5ADeiL1jiURZBgFnFyOOyZ5yEV1M";
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+function showError(msg){
+  document.getElementById("error").innerText = msg;
+}
+
+/* 🚀 LOGIN */
+async function loginUser(){
+
+let mobile = document.getElementById("mobile").value.trim();
+let password = document.getElementById("password").value.trim();
+let btn = document.getElementById("btn");
+
+if(!mobile || !password){
+  showError("⚠️ সব ফিল্ড পূরণ করো");
+  return;
+}
+
+if(mobile.length !== 11){
+  showError("📱 Mobile number 11 digit হতে হবে");
+  return;
+}
+
+if(password.length < 6){
+  showError("🔐 Password কমপক্ষে 6 character হতে হবে");
+  return;
+}
+
+/* loading */
+btn.disabled = true;
+btn.innerText = "Logging in...";
+
+try{
+
+let { data, error } = await supabase
+  .from("users")
+  .select("*")
+  .eq("mobile", mobile)
+  .eq("password", password)
+  .maybeSingle();
+
+if(error || !data){
+  showError("❌ ভুল Mobile বা Password");
+  return;
+}
+
+localStorage.setItem("user", JSON.stringify(data));
+
+showError("✔ Login successful");
+
+setTimeout(()=>{
+  window.location.href = "home.html";
+},800);
+
+}catch(e){
+  showError("⚠️ Server সমস্যা হয়েছে");
+}finally{
+  btn.disabled = false;
+  btn.innerText = "Login";
+}
+
+}
+
+</script>
+
+</body>
+</html>

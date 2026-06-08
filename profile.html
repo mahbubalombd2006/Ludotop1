@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ludo Top 1 - Profile</title>
+
+<!-- সঠিক Supabase CDN লিংক -->
+<script src="https://jsdelivr.net"></script>
+
+
+<style>
+
+/* RESET */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  background:#f6f6f6;
+}
+
+/* TOP BAR */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:linear-gradient(135deg,#ff8c00,#ffb347);
+  color:white;
+}
+
+/* BRAND */
+.brand{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.brand img{
+  width:38px;
+  height:38px;
+  object-fit:contain;
+}
+
+.balance{
+  background:white;
+  color:#ff8c00;
+  padding:5px 10px;
+  border-radius:20px;
+  font-weight:bold;
+  font-size:13px;
+}
+
+/* CONTAINER */
+.container{
+  padding:10px;
+  padding-bottom:80px;
+  max-width:500px;
+  margin:auto;
+}
+
+/* PROFILE CARD */
+.profile-card{
+  background:white;
+  margin:20px 0;
+  padding:25px 15px;
+  border-radius:15px;
+  text-align:center;
+  box-shadow:0 4px 15px rgba(0,0,0,0.06);
+}
+
+.avatar-img{
+  width:85px;
+  height:85px;
+  object-fit:contain;
+  margin:0 auto 15px;
+  display:block;
+}
+
+.profile-card h3{
+  color:#222;
+  font-size:20px;
+  margin-bottom:5px;
+}
+
+.profile-card p{
+  color:#666;
+  font-size:14px;
+  margin-bottom:15px;
+}
+
+/* DETAILS CARD */
+.details-card{
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.05);
+  margin-bottom:15px;
+}
+
+.info-row{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 0;
+  border-bottom:1px solid #eee;
+  font-size:14px;
+  color:#333;
+}
+
+.info-row:last-child{
+  border-bottom:none;
+}
+
+.info-row b{
+  color:#666;
+}
+
+/* BUTTONS */
+.logout-btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#ff3333;
+  color:white;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 3px 10px rgba(255,51,51,0.2);
+  margin-bottom:12px;
+}
+
+.whatsapp-btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#25D366;
+  color:white;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  text-decoration:none;
+  box-shadow:0 3px 10px rgba(37,211,102,0.2);
+}
+
+/* NAV */
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  background:white;
+  padding:10px 0;
+  box-shadow:0 -5px 15px rgba(0,0,0,0.1);
+}
+
+.nav div{
+  cursor:pointer;
+  font-size:14px;
+}
+
+.nav .active{
+  color:#ff8c00;
+  font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+
+  <div class="brand">
+    <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png" alt="Logo">
+    <b>Ludo Top 1</b>
+  </div>
+
+  <div class="balance" id="balanceBox">💰 0 TK</div>
+
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+  <!-- PROFILE HEADER (রকেট লোগো অ্যাড করা হয়েছে) -->
+  <div class="profile-card">
+    <img src="https://cdn-icons-png.flaticon.com/512/1055/1055646.png" class="avatar-img" alt="User Profile">
+    <h3 id="profName">Loading...</h3>
+    <p id="profMobile">01XXXXXXXXX</p>
+  </div>
+
+  <!-- ACCOUNT DETAILS -->
+  <div class="details-card">
+    <div class="info-row">
+      <b>Status</b>
+      <span style="color:#2ecc71; font-weight:bold;">Active ✔</span>
+    </div>
+    <div class="info-row">
+      <b>Total Balance</b>
+      <span id="profBalance" style="font-weight:bold; color:#ff8c00;">0 TK</span>
+    </div>
+  </div>
+
+  <!-- LOGOUT BUTTON -->
+  <button class="logout-btn" onclick="logout()">Log Out</button>
+
+  <!-- WHATSAPP SUPPORT BUTTON (আপনার নম্বর লিঙ্ক করা হয়েছে) -->
+  <a href="https://wa.me" target="_blank" class="whatsapp-btn">
+    💬 WhatsApp Support
+  </a>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="nav">
+  <div onclick="location.href='home.html'">🏠 Home</div>
+  <div onclick="location.href='wallet.html'">💰 Wallet</div>
+  <div class="active" onclick="location.href='profile.html'">👤 Profile</div>
+</div>
+
+<script>
+
+/* SUPABASE */
+const supabase = window.supabase.createClient(
+"https://jvyszdfernpsweparyuw.supabase.co", 
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2eXN6ZGZlcm5wc3dlcGFyeXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTIwMTEsImV4cCI6MjA5NjQyODAxMX0.Lt88u13F5tesQAh5ADeiL1jiURZBgFnFyOOyZ5yEV1M" // আপনার আসল Anon Key এখানে বসাবেন
+);
+
+/* USER LOGIN CHECK */
+let user = JSON.parse(localStorage.getItem("user"));
+
+if(!user){
+  location.href="login.html";
+}
+
+/* LOAD PROFILE DATA FROM DATABASE */
+async function loadProfile(){
+  document.getElementById("profName").innerText = user.name || "User";
+  document.getElementById("profMobile").innerText = user.mobile;
+  document.getElementById("profBalance").innerText = (user.wallet_balance || 0) + " TK";
+  document.getElementById("balanceBox").innerText = "💰 " + (user.wallet_balance || 0) + " TK";
+
+  let { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("mobile", user.mobile)
+    .single();
+
+  if(data && !error){
+    document.getElementById("profName").innerText = data.name;
+    document.getElementById("profBalance").innerText = data.wallet_balance + " TK";
+    document.getElementById("balanceBox").innerText = "💰 " + data.wallet_balance + " TK";
+    
+    localStorage.setItem("user", JSON.stringify(data));
+  }
+}
+loadProfile();
+
+/* LOGOUT FUNCTION */
+function logout(){
+  if(confirm("Are you sure you want to log out?")){
+    localStorage.removeItem("user");
+    location.href = "login.html";
+  }
+}
+
+</script>
+
+</body>
+</html>

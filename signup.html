@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Ludo Top 1 - Signup</title>
+
+<script src="https://jsdelivr.net"></script>
+
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body{
+  width:100%;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#f3f0e8,#fff7e6);
+}
+
+.box{
+  width:90%;
+  max-width:340px;
+  text-align:center;
+  background:#fff;
+  padding:25px 18px;
+  border-radius:18px;
+  box-shadow:0 15px 35px rgba(0,0,0,0.12);
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:7px 0;
+  border:1px solid #ddd;
+  border-radius:10px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#ff8c00;
+  color:white;
+  font-size:16px;
+}
+
+button:disabled{
+  opacity:0.6;
+}
+
+.error{
+  color:red;
+  font-size:13px;
+  margin-top:10px;
+  min-height:18px;
+}
+
+.login{
+  margin-top:12px;
+  font-size:13px;
+}
+
+.login a{
+  color:#ff8c00;
+  font-weight:bold;
+  text-decoration:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>🎲 Ludo Top 1</h2>
+<p>Create new account</p>
+
+<input id="name" placeholder="Full Name">
+<input id="mobile" placeholder="Mobile Number">
+<input id="password" type="password" placeholder="Password">
+
+<button id="btn" onclick="signupUser()">Signup</button>
+
+<div class="error" id="error"></div>
+
+<div class="login">
+Already have account? <a href="login.html">Login</a>
+</div>
+
+</div>
+
+<script>
+
+/* 🔑 SUPABASE */
+const SUPABASE_URL = "https://jvyszdfernpsweparyuw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2eXN6ZGZlcm5wc3dlcGFyeXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTIwMTEsImV4cCI6MjA5NjQyODAxMX0.Lt88u13F5tesQAh5ADeiL1jiURZBgFnFyOOyZ5yEV1M";
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+function showError(msg){
+  document.getElementById("error").innerText = msg;
+}
+
+/* 🚀 SIGNUP */
+async function signupUser(){
+
+let name = document.getElementById("name").value.trim();
+let mobile = document.getElementById("mobile").value.trim();
+let password = document.getElementById("password").value.trim();
+let btn = document.getElementById("btn");
+
+/* validation */
+if(!name || !mobile || !password){
+  showError("⚠️ সব ফিল্ড পূরণ করো");
+  return;
+}
+
+if(mobile.length !== 11){
+  showError("📱 Mobile number 11 digit হতে হবে");
+  return;
+}
+
+if(password.length < 6){
+  showError("🔐 Password কমপক্ষে 6 character হতে হবে");
+  return;
+}
+
+/* loading start */
+btn.disabled = true;
+btn.innerText = "Creating account...";
+
+try{
+
+/* 🔍 check duplicate mobile */
+let { data: existing } = await supabase
+  .from("users")
+  .select("*")
+  .eq("mobile", mobile)
+  .single();
+
+if(existing){
+  showError("❌ এই mobile number already use হয়েছে");
+  btn.disabled = false;
+  btn.innerText = "Signup";
+  return;
+}
+
+/* 🟢 insert user */
+let { error } = await supabase
+  .from("users")
+  .insert([
+    {
+      name: name,
+      mobile: mobile,
+      password: password,
+      wallet_balance: 0
+    }
+  ]);
+
+if(error){
+  showError("❌ Signup failed");
+  btn.disabled = false;
+  btn.innerText = "Signup";
+  return;
+}
+
+showError("✔ Account created successfully");
+
+setTimeout(()=>{
+  window.location.href = "login.html";
+},1200);
+
+}catch(e){
+
+showError("⚠️ Server সমস্যা হয়েছে");
+
+}finally{
+
+btn.disabled = false;
+btn.innerText = "Signup";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
